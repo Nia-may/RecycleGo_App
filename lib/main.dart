@@ -25,7 +25,7 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 138, 231, 161),
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 8, 183, 51),
+        backgroundColor: const Color.fromARGB(255, 8, 202, 57),
         title: const Text('RecycleGo'),
       ),
       body: Padding(
