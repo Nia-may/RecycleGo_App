@@ -94,7 +94,10 @@ class HomePage extends StatelessWidget {
         const SizedBox(height:30),
         ElevatedButton(
           onPressed: () {
-            print('Recycle button pressed');
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const RecylingPage()),
+            );
           },
           child: const Text('Recycle something'),
         ),
@@ -160,6 +163,56 @@ class HomePage extends StatelessWidget {
           ),
         ),
         ],
+        ),
+      ),
+    );
+  }
+}
+
+class RecylingPage extends StatelessWidget {
+  const RecylingPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Recycle Something'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'What are you recycling today?',
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
+            
+            const SizedBox(height: 20),
+            
+            const Text(
+              'Select an item',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,),
+            ),
+
+            const SizedBox(height: 10),
+
+            DropdownButtonFormField<String>(
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Recycling Item',
+              ),
+              items: const [
+                DropdownMenuItem(value: 'Plastic', child: Text('Plastic'),),
+                DropdownMenuItem(value: 'Paper', child: Text('Paper'),),
+                DropdownMenuItem(value: 'Glass', child: Text('Glass'),),
+                DropdownMenuItem(value: 'Metal', child: Text('Metal'),),
+              ],
+              onChanged: (value) {
+                print(value);
+              },
+            ),
+          ],
         ),
       ),
     );
