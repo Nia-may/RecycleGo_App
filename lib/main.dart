@@ -169,8 +169,41 @@ class HomePage extends StatelessWidget {
   }
 }
 
-class RecylingPage extends StatelessWidget {
+class RecylingPage extends StatefulWidget {
   const RecylingPage({super.key});
+
+  @override
+  State<RecylingPage> createState() => _RecylingPageState();
+}
+
+class _RecylingPageState extends State<RecylingPage> {
+
+  String? selectedItem;
+
+  int calculatePoints(){
+    int pointsPerItem = 0;
+
+  if (selectedItem == 'Plastic'){
+    pointsPerItem = 5;
+  }else if (selectedItem == 'Paper'){
+    pointsPerItem = 2;
+  }else if (selectedItem == 'Glass'){
+    pointsPerItem = 4;
+  }else if (selectedItem == 'Metal'){
+    pointsPerItem = 8;
+  }
+
+  int quantity = int.tryParse(quantityController.text) ?? 0;
+  return pointsPerItem * quantity;
+  }
+
+  final TextEditingController quantityController = TextEditingController();
+
+  @override
+  void dispose() {
+    quantityController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -178,7 +211,7 @@ class RecylingPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Recycle Something'),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -209,9 +242,82 @@ class RecylingPage extends StatelessWidget {
                 DropdownMenuItem(value: 'Metal', child: Text('Metal'),),
               ],
               onChanged: (value) {
-                print(value);
+                setState(() {
+                  selectedItem = value;
+                });
               },
             ),
+             const SizedBox(height: 20),
+
+             const Text(
+              'How many?',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,),
+             ),
+
+             const SizedBox(height: 10),
+
+            TextField(
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Quantity',
+                hintText: 'e.g. 2',),
+              controller: quantityController,
+            ),
+
+              const SizedBox(height: 30),
+
+              const Text(
+                'Photo',
+                style:TextStyle(fontSize: 16, fontWeight: FontWeight.bold,),
+              ),
+
+              const SizedBox(height: 10),
+
+              OutlinedButton.icon(
+                onPressed: () {
+                  print('Choose photo');
+                },
+                icon: const Icon(Icons.camera_alt),
+                label: const Text('Upload Photo'),
+              ),
+
+              const SizedBox(height: 30),
+
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    if (selectedItem == null || quantityController.text.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Please select an item and enter a quantity.')),
+                      );
+                      return;
+                    }
+                    int points=calculatePoints();
+
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: const Text('♻️ Recycling Submitted!'),
+                          content: Text('You have recycled ${quantityController.text} ${selectedItem!.toLowerCase()} item(s).\n\n'
+                          '🎉 You earned $points points!',),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              child: const Text('OK'),
+                            ),
+                          ],
+                        );
+                      }
+                    );
+                  },
+                  child: const Text('Submit Recycling'),
+                ),
+              ),
           ],
         ),
       ),
