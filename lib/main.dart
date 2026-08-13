@@ -17,8 +17,34 @@ class RecycleGoApp extends StatelessWidget {
   }
 }
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  int totalPoints = 0;
+  int totalItems = 0;
+  int streak=0;
+  DateTime? lastRecyclingDate;
+
+  void updateStreak() {
+    final today = DateTime.now();
+    if (lastRecyclingDate == null) {
+      streak=1;
+    }else{
+      final difference = today.difference(lastRecyclingDate!).inDays;
+
+      if (difference == 1) {
+        streak++;
+      } else if (difference > 1) {
+        streak = 1; // Reset streak if more than a day has passed
+      }
+    }
+    lastRecyclingDate = today;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,9 +78,9 @@ class HomePage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                     color: Colors.green.shade50,
                   ),
-                  child: const Column(children: [
+                  child: Column(children: [
                     Text('⭐'),
-                    Text('0'),
+                    Text('$totalPoints'),
                     Text('Points'),
                   ],),
                 ),
@@ -67,10 +93,10 @@ class HomePage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                     color: Colors.blue.shade50,
                   ),
-                  child: const Column(children: [
-                    Text('♻️'),
-                    Text('0'),
-                    Text('Items'),
+                  child: Column(children: [
+                    const Text('♻️'),
+                    Text('$totalItems'),
+                    const Text('Items'),
                   ],),
                 ),
               ),
@@ -82,10 +108,10 @@ class HomePage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                     color: Colors.orange.shade50,
                   ),
-                  child: const Column(children: [
-                    Text('🔥'),
-                    Text('0'),
-                    Text('Streak'),
+                  child: Column(children: [
+                    const Text('🔥'),
+                    Text('$streak'),
+                    const Text('Streak'),
                   ],),
                 ),
               ),
@@ -93,11 +119,19 @@ class HomePage extends StatelessWidget {
           ),
         const SizedBox(height:30),
         ElevatedButton(
-          onPressed: () {
-            Navigator.push(
+          onPressed: () async{
+            final result = await Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const RecylingPage()),
             );
+
+            if (result != null && result is Map) {
+              setState(() {
+                totalPoints += result['points'] as int;
+                totalItems += result['items'] as int;
+                updateStreak();
+              });
+            }
           },
           child: const Text('Recycle something'),
         ),
@@ -307,6 +341,10 @@ class _RecylingPageState extends State<RecylingPage> {
                             TextButton(
                               onPressed: () {
                                 Navigator.pop(context);
+                                Navigator.pop(context, {
+                                  'points': points,
+                                  'items': int.tryParse(quantityController.text) ?? 0,
+                                });
                               },
                               child: const Text('OK'),
                             ),
