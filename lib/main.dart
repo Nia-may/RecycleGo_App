@@ -17,6 +17,20 @@ class RecycleGoApp extends StatelessWidget {
   }
 }
 
+class RecyclingActivity {
+  final String item;
+  final int quantity;
+  final int points;
+  final DateTime dateTime;
+
+  RecyclingActivity({
+    required this.item,
+    required this.quantity,
+    required this.points,
+    required this.dateTime,
+  });
+}
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -24,11 +38,87 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
+class ActivityPage extends StatelessWidget {
+  final List<RecyclingActivity> activities;
+
+  const ActivityPage({super.key, required this.activities});
+
+  String formatDate(DateTime date){
+    final now = DateTime.now();
+
+    if (date.year == now.year && date.month == now.month && date.day == now.day) {
+      return 'Today';
+    } 
+
+    return '${date.day} ${_monthName(date.month)} ${date.year}';
+  }
+
+  String _monthName(int month) {
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return months[month - 1];
+  }
+
+  String formatTime(DateTime time) {
+    final hour = time.hour % 12 == 0 ? 12 : time.hour % 12;
+    final minute = time.minute.toString().padLeft(2, '0');
+    final period = time.hour >= 12 ? 'PM' : 'AM';
+    return '$hour:$minute $period';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Activity History'),
+      ),
+      body: activities.isEmpty
+          ? const Center(child: Text('No activities to display'))
+          : ListView.builder(
+              padding: const EdgeInsets.all(16.0),
+              itemCount: activities.length,
+              itemBuilder: (context, index) {
+                final activity = activities[index];
+                final DateTime dateTime = activity.dateTime;
+
+          return Card(
+            margin: const EdgeInsets.only(bottom: 12),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('♻️ ${activity.item} × ${activity.quantity}',
+                  style: const TextStyle(
+                    fontSize: 18, fontWeight: FontWeight.bold,),
+                  ),
+
+                  const SizedBox(height: 6),
+
+
+                  Text(
+                    '${formatDate(dateTime)} • ${formatTime(dateTime)}',
+                    style: const TextStyle(color: Colors.grey),
+                  ),
+                ],   
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
 class _HomePageState extends State<HomePage> {
   int totalPoints = 0;
   int totalItems = 0;
   int streak=0;
   DateTime? lastRecyclingDate;
+
+  List<RecyclingActivity> recentActivities = [];
 
   void updateStreak() {
     final today = DateTime.now();
@@ -48,6 +138,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final displayedActivities = recentActivities.take(3).toList();
+
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 138, 231, 161),
       appBar: AppBar(
@@ -129,6 +221,14 @@ class _HomePageState extends State<HomePage> {
               setState(() {
                 totalPoints += result['points'] as int;
                 totalItems += result['items'] as int;
+
+                recentActivities.insert(0, RecyclingActivity(
+                  item: result['item'] as String,
+                  quantity: result['items'] as int,
+                  points: result['points'] as int,
+                  dateTime: DateTime.now(),
+                ));
+
                 updateStreak();
               });
             }
@@ -191,11 +291,43 @@ class _HomePageState extends State<HomePage> {
 
                const SizedBox(height: 12),
 
-                const Text('♻️ Plastic Bottle × 5'),
-                const Text('+25 points'),
+              if (recentActivities.isEmpty)
+                const Text('No recent activity.')
+              else
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: displayedActivities.map((activity) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '♻️ ${activity.item} × ${activity.quantity}',
+                          ),
+                          Text('+${activity.points} points'),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                )
             ],
           ),
         ),
+        const SizedBox(height: 20),
+
+        Align(
+          alignment: Alignment.centerRight,
+          child: TextButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ActivityPage(activities: recentActivities,),),
+              );
+            },
+            child: const Text('View Activity History'),
+          ),
+        )
         ],
         ),
       ),
@@ -344,6 +476,7 @@ class _RecylingPageState extends State<RecylingPage> {
                                 Navigator.pop(context, {
                                   'points': points,
                                   'items': int.tryParse(quantityController.text) ?? 0,
+                                  'item': selectedItem,
                                 });
                               },
                               child: const Text('OK'),
