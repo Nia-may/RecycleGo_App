@@ -1,4 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'package:google_fonts/google_fonts.dart';
+
+class AppColors {
+  static const primary = Color(0xFF8FD694);
+  static const background = Color(0xFFF3FAF4);
+  static const white = Color(0xFFFFFFFF);
+
+  static const softBlue = Color(0xFFDCEFF2);
+  static const softYellow = Color(0xFFFFF3C4);
+  static const softPeach = Color(0xFFFFE4D6);
+
+  static const text=Color(0xFF3F5143);
+}
 
 void main() {
   runApp(const RecycleGoApp());
@@ -22,12 +37,14 @@ class RecyclingActivity {
   final int quantity;
   final int points;
   final DateTime dateTime;
+  final String? photoPath;
 
   RecyclingActivity({
     required this.item,
     required this.quantity,
     required this.points,
     required this.dateTime,
+    this.photoPath,
   });
 }
 
@@ -90,9 +107,33 @@ class ActivityPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  if (activity.photoPath != null) 
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.file(
+                                File(activity.photoPath!),
+                                height: 200,
+                                width:double.infinity,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+
                   Text('♻️ ${activity.item} × ${activity.quantity}',
                   style: const TextStyle(
                     fontSize: 18, fontWeight: FontWeight.bold,),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                    decoration: BoxDecoration(
+                      color: Colors.green.shade100,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text('+${activity.points} pts',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                    ),
                   ),
 
                   const SizedBox(height: 6),
@@ -141,10 +182,15 @@ class _HomePageState extends State<HomePage> {
     final displayedActivities = recentActivities.take(3).toList();
 
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 138, 231, 161),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 8, 202, 57),
-        title: const Text('RecycleGo'),
+        backgroundColor: AppColors.primary,
+        title: Text('RecycleGo',
+        style: GoogleFonts.fredoka(
+          color: AppColors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 22,
+        )),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -227,6 +273,7 @@ class _HomePageState extends State<HomePage> {
                   quantity: result['items'] as int,
                   points: result['points'] as int,
                   dateTime: DateTime.now(),
+                  photoPath: result['photoPath'] as String?,
                 ));
 
                 updateStreak();
@@ -302,6 +349,7 @@ class _HomePageState extends State<HomePage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          
                           Text(
                             '♻️ ${activity.item} × ${activity.quantity}',
                           ),
@@ -343,7 +391,8 @@ class RecylingPage extends StatefulWidget {
 }
 
 class _RecylingPageState extends State<RecylingPage> {
-
+  final ImagePicker picker = ImagePicker(); 
+  XFile? selectedImage;
   String? selectedItem;
 
   int calculatePoints(){
@@ -361,6 +410,15 @@ class _RecylingPageState extends State<RecylingPage> {
 
   int quantity = int.tryParse(quantityController.text) ?? 0;
   return pointsPerItem * quantity;
+  }
+
+  Future<void> pickImage(ImageSource source) async {
+    final XFile? image = await picker.pickImage(source: source);
+    if (image != null) {
+      setState(() {
+        selectedImage = image;
+      });
+    }
   }
 
   final TextEditingController quantityController = TextEditingController();
@@ -441,12 +499,31 @@ class _RecylingPageState extends State<RecylingPage> {
               const SizedBox(height: 10),
 
               OutlinedButton.icon(
-                onPressed: () {
-                  print('Choose photo');
-                },
+                onPressed: () => pickImage(ImageSource.camera),
                 icon: const Icon(Icons.camera_alt),
-                label: const Text('Upload Photo'),
-              ),
+                label: const Text('Take Photo'),
+              ),//take photo by camera
+              OutlinedButton.icon(
+                onPressed: () => pickImage(ImageSource.gallery),
+                icon: const Icon(Icons.photo),
+                label: const Text('Choose from Gallery'),
+              ),//take photo from gallery
+
+
+              if (selectedImage != null) ...[
+                const SizedBox(height: 15),
+
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child:
+                Image.file(
+                  File(selectedImage!.path),
+                  height: 200,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+                ),
+              ],
 
               const SizedBox(height: 30),
 
@@ -477,6 +554,7 @@ class _RecylingPageState extends State<RecylingPage> {
                                   'points': points,
                                   'items': int.tryParse(quantityController.text) ?? 0,
                                   'item': selectedItem,
+                                  'photoPath': selectedImage?.path,
                                 });
                               },
                               child: const Text('OK'),
