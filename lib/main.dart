@@ -27,7 +27,45 @@ class RecycleGoApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'RecycleGo',
-      home: const HomePage(),
+
+      theme: ThemeData(
+        scaffoldBackgroundColor: AppColors.background,
+
+        textTheme: GoogleFonts.nunitoTextTheme(),
+
+        colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary,),
+
+        appBarTheme: AppBarTheme(
+          backgroundColor: AppColors.primary,
+          foregroundColor: AppColors.white,
+          elevation: 0,
+          titleTextStyle: GoogleFonts.fredoka(
+            color: AppColors.white,
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primary,
+            foregroundColor:AppColors.white,
+            elevation: 0,
+            padding: const EdgeInsets.symmetric(
+              vertical: 14,
+              horizontal: 24,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            textStyle: GoogleFonts.fredoka(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ),
+      home: const WeeklyGoalPage(),
     );
   }
 }
@@ -48,8 +86,105 @@ class RecyclingActivity {
   });
 }
 
+class WeeklyGoalPage extends StatefulWidget{
+  const WeeklyGoalPage({super.key});
+
+  @override
+  State<WeeklyGoalPage> createState() => _WeeklyGoalPageState();
+}
+
+class _WeeklyGoalPageState extends State<WeeklyGoalPage>{
+  final TextEditingController goalController=TextEditingController();
+
+  @override
+  void dispose(){
+    goalController.dispose();
+    super.dispose();
+  }
+
+  void saveGoal(){
+    final goal=int.tryParse(goalController.text);
+
+    if (goal==null||goal<=0){
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid goal.'),),
+      );
+      return;
+    }
+
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: 
+    (context)=> HomePage(weeklyGoal: goal),),);
+  }
+
+  @override
+  Widget build(BuildContext context){
+    return Scaffold(
+      backgroundColor: AppColors.background,
+
+      body: Padding(padding: const EdgeInsets.all(24.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text(
+            '♻️',
+            style: TextStyle(fontSize: 60),),
+
+            const SizedBox(height: 20),
+
+            Text(
+              'Set Your Weekly Goal',
+              style: GoogleFonts.fredoka(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: AppColors.text,
+              ),
+              textAlign: TextAlign.center,
+            ),
+
+            const SizedBox(height: 12),
+
+            const Text(
+              'How many items would u like to recycle each week?',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                color: AppColors.text,
+              ),
+            ),
+
+            const SizedBox(height: 30),
+
+            TextField(
+              controller: goalController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Weekly goal',
+                hintText: 'e.g. 10',
+                border: OutlineInputBorder(),
+              ),),
+              
+              const SizedBox(height: 25),
+
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: saveGoal,
+                  child: const Text('continue'),
+                ),
+              ),
+        ],
+      ),),
+    );
+  }
+}
+
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final int weeklyGoal;
+
+  const HomePage({
+    super.key,
+    required this.weeklyGoal,
+  });
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -159,6 +294,14 @@ class _HomePageState extends State<HomePage> {
   int streak=0;
   DateTime? lastRecyclingDate;
 
+  late int weeklyGoal;
+  @override
+  void initState(){
+    super.initState();
+    weeklyGoal=widget.weeklyGoal;
+  }
+  int weeklyItems=0;
+
   List<RecyclingActivity> recentActivities = [];
 
   void updateStreak() {
@@ -192,16 +335,17 @@ class _HomePageState extends State<HomePage> {
           fontSize: 22,
         )),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Hi, Nin',
-               style: TextStyle(
-                fontSize: 24,
+               style: GoogleFonts.fredoka(
+                fontSize: 28,
                 fontWeight: FontWeight.bold,
+                color: AppColors.text,
               ),
          ),
 
@@ -211,45 +355,80 @@ class _HomePageState extends State<HomePage> {
             children: [
               Expanded(
                 child: Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
                     color: Colors.green.shade50,
                   ),
                   child: Column(children: [
-                    Text('⭐'),
-                    Text('$totalPoints'),
-                    Text('Points'),
+                    Text('⭐',
+                    style: TextStyle(fontSize: 24),),
+
+                    const SizedBox(height: 6),
+                    
+                    Text('$totalPoints',
+                    style: GoogleFonts.fredoka(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.text,
+                    ),),
+                    Text('Points',
+                    style: GoogleFonts.nunito(
+                      fontSize: 14,
+                      color: AppColors.text,
+                    ),),
                   ],),
                 ),
               ),
 
               Expanded(
                 child: Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(20),
+                    color: Colors.green.shade50,
                   ),
                   child: Column(children: [
-                    const Text('♻️'),
-                    Text('$totalItems'),
-                    const Text('Items'),
+                    const Text('♻️', style: TextStyle(fontSize: 24,),),
+
+                    const SizedBox(height: 6),
+
+                    Text('$totalItems',
+                    style: GoogleFonts.fredoka(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.text,
+                    ),),
+                    Text('Items', style: GoogleFonts.nunito(
+                      fontSize: 14,
+                      color: AppColors.text,
+                    ),),
                   ],),
                 ),
               ),
               
               Expanded(
                 child: Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    color: Colors.orange.shade50,
+                    borderRadius: BorderRadius.circular(20),
+                    color: Colors.green.shade50,
                   ),
                   child: Column(children: [
-                    const Text('🔥'),
-                    Text('$streak'),
-                    const Text('Streak'),
+                    const Text('🔥', style: TextStyle(fontSize: 24),),
+
+                    const SizedBox(height: 6),
+                    
+                    Text('$streak', style: GoogleFonts.fredoka(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.text,
+                    ),),
+                    Text('Streak',
+                    style: GoogleFonts.nunito(
+                      fontSize: 14,
+                      color: AppColors.text,
+                    ),),
                   ],),
                 ),
               ),
@@ -267,6 +446,7 @@ class _HomePageState extends State<HomePage> {
               setState(() {
                 totalPoints += result['points'] as int;
                 totalItems += result['items'] as int;
+                weeklyItems += result['items'] as int;
 
                 recentActivities.insert(0, RecyclingActivity(
                   item: result['item'] as String,
@@ -294,24 +474,30 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Your Progress',
-                 style: TextStyle(
-                 fontSize: 20,
+                 style: GoogleFonts.fredoka(
+                 fontSize: 21,
                  fontWeight: FontWeight.bold,
+                 color: AppColors.text,
                 ),
               ),
 
                const SizedBox(height: 10),
 
-                LinearProgressIndicator(
-                value: 0.5,
-                minHeight: 10,
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: LinearProgressIndicator(
+                    value: weeklyGoal == 0 ? 0 
+                      :(weeklyItems/weeklyGoal).clamp(0.0, 1.0),
+                    minHeight: 10,
+                    backgroundColor: AppColors.softBlue,
+                    valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),),
                 ),
 
                 const SizedBox(height: 8),
 
-                const Text('You have recycled 5 out of 10 items this week!',
+                Text('You have recycled $weeklyItems out of $weeklyGoal items this week!',
         ),
             ],
           ),
@@ -328,11 +514,12 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Recent Activity',
-                style: TextStyle(
-                fontSize: 20,
+                style: GoogleFonts.fredoka(
+                fontSize: 21,
                 fontWeight: FontWeight.bold,
+                color: AppColors.text,
               ),
             ),
 
