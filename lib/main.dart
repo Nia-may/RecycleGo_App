@@ -11,6 +11,7 @@ class AppColors {
   static const softBlue = Color(0xFFDCEFF2);
   static const softYellow = Color(0xFFFFF3C4);
   static const softPeach = Color(0xFFFFE4D6);
+  static const softGreen = Color(0xFFDDF3DF);
 
   static const text=Color(0xFF3F5143);
 }
@@ -190,6 +191,241 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
+class ProfilePage extends StatefulWidget{
+  final int weeklyGoal;
+  const ProfilePage({super.key, required this.weeklyGoal,});
+
+  @override
+  State<ProfilePage> createState()=> _profilePageState();
+}
+
+// ignore: camel_case_types
+class _profilePageState extends State<ProfilePage>{
+  @override
+  Widget build(BuildContext context){
+    return Scaffold(
+      backgroundColor: AppColors.background,
+
+      appBar: AppBar(
+        title: const Text('Profile'),
+      ),
+
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            CircleAvatar(
+              radius: 50,
+              backgroundColor: AppColors.softGreen,
+              child: const Text(
+                '👤',
+                style: TextStyle(fontSize: 45),
+              ),
+            ),
+
+            const SizedBox(height: 15),
+
+            Text(
+              'Nin',
+              style: GoogleFonts.fredoka(
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+                color: AppColors.text,
+              ),
+            ),
+
+            const SizedBox(height: 25),
+
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                '📊 Your Recycling',
+                style: GoogleFonts.fredoka(
+                  fontSize: 21,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.text,
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+
+            Row(
+              children: [
+                Expanded(child: _profileStat(
+                  '⭐',
+                  '0',
+                  'Points',
+                ),),
+
+                const SizedBox(width: 10),
+
+                Expanded(child: _profileStat(
+                  '♻️',
+                  '0',
+                  'Items',
+                ),),
+
+                const SizedBox(width: 10),
+
+                Expanded(child: _profileStat(
+                  '🔥',
+                  '0',
+                  'Streak',
+                ),),
+              ],
+            ),
+
+            const SizedBox(height: 25),
+
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(20),
+              ),
+
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+
+                  Text(
+                    '🎯 Your Goal',
+                    style: GoogleFonts.fredoka(
+                      fontSize: 21,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.text,
+                    ),
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  Text(
+                    '${widget.weeklyGoal} items per week',
+                    style: GoogleFonts.nunito(
+                      fontSize: 16,
+                      color: AppColors.text,
+                    ),
+                  ),
+
+                  const SizedBox(height: 15),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () async{
+                        final controller =TextEditingController(
+                          text: widget.weeklyGoal.toString(),
+                        );
+
+                        final result =await showDialog<int>(
+                          context: context,
+                          builder: (context){
+                            return AlertDialog(
+                              title: const Text('Change Weekly Goal'),
+                              content: TextField(
+                                controller: controller,
+                                keyboardType: TextInputType.number,
+                                decoration: const InputDecoration(
+                                  labelText: 'Items per week',
+                                  hintText: 'e.g. 10',
+                                ),
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: (){
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Text('Cancel'),
+                                ),
+
+                                ElevatedButton(
+                                  onPressed: (){
+                                    final goal =int.tryParse(controller.text);
+
+                                    if(goal==null||goal<=0){
+                                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                                        content: Text('Please enter a valid goal.'),
+                                      ),);
+                                      return;
+                                    }
+
+                                    Navigator.pop(context, goal);
+                                  },
+                                  child: const Text('Save'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+
+                        controller.dispose();
+
+                        if (result !=null && mounted){
+                          // ignore: use_build_context_synchronously
+                          Navigator.pop(context, result);
+                        }
+                      },
+                      child: const Text('Change Goal'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _profileStat(
+    String icon,
+    String value, 
+    String label, 
+  ){
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      decoration: BoxDecoration(
+        color: AppColors.white, 
+        borderRadius: BorderRadius.circular(18),
+      ),
+
+      child: Column(
+        children: [
+          Text(
+            icon, 
+            style: const TextStyle(fontSize: 24),
+          ),
+
+          const SizedBox(height: 5),
+
+          Text(
+            value,
+            style: GoogleFonts.fredoka(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: AppColors.text,
+            ),
+          ),
+
+          Text(
+            label, 
+            style: GoogleFonts.nunito(
+              fontSize: 13,
+              color: AppColors.text,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
 class ActivityPage extends StatelessWidget {
   final List<RecyclingActivity> activities;
 
@@ -333,7 +569,30 @@ class _HomePageState extends State<HomePage> {
           color: AppColors.white,
           fontWeight: FontWeight.bold,
           fontSize: 22,
-        )),
+        ),),
+
+        actions: [
+          IconButton(
+            onPressed: () async{
+              final result = await Navigator.push (
+                context,
+                MaterialPageRoute(builder: (context)=>ProfilePage(weeklyGoal: weeklyGoal,),),
+              );
+
+              if (result != null && result is int && mounted){
+                setState(() {
+                  weeklyGoal=result;
+                });
+              }
+            },
+            icon: const Icon(
+              Icons.account_circle,
+              color: AppColors.white,
+              size: 30,
+            ),
+          ),
+          const SizedBox(width: 8),
+        ]
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
