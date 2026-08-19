@@ -14,43 +14,92 @@ class AppColors {
   static const softGreen = Color(0xFFDDF3DF);
 
   static const text=Color(0xFF3F5143);
+
+  //dark mode palatte
+  static const darkBackground = Color(0xFF18221A);
+  static const darkCard = Color(0xFF26352A);
+  static const darkText = Color(0xFFE8F5E9);
+  static const darkAppBar = Color(0xFF3F6544);
+
 }
 
-void main() {
-  runApp(const RecycleGoApp());
-}
+class AppTheme{
+  static ThemeData lightTheme(){
+    return ThemeData(
+      brightness: Brightness.light,
+      scaffoldBackgroundColor: AppColors.background,
 
-class RecycleGoApp extends StatelessWidget {
-  const RecycleGoApp({super.key});
-  // This widget is the root of your application.
-  
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'RecycleGo',
+      textTheme: GoogleFonts.nunitoTextTheme(),
 
-      theme: ThemeData(
-        scaffoldBackgroundColor: AppColors.background,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: AppColors.primary,
+        brightness: Brightness.light,
+      ),
 
-        textTheme: GoogleFonts.nunitoTextTheme(),
+      appBarTheme: AppBarTheme(
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.white,
+        elevation: 0,
+        titleTextStyle: GoogleFonts.fredoka(
+          color: AppColors.white,
+          fontSize: 22,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
 
-        colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary,),
-
-        appBarTheme: AppBarTheme(
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.white,
           elevation: 0,
+          padding: const EdgeInsets.symmetric(
+            vertical: 14,
+            horizontal: 24,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          textStyle: GoogleFonts.fredoka(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+
+  static ThemeData darkTheme(){
+    return ThemeData(
+      brightness: Brightness.dark,
+
+        scaffoldBackgroundColor: AppColors.darkBackground,
+
+        textTheme: GoogleFonts.nunitoTextTheme(
+          ThemeData.dark().textTheme,
+        ),
+
+        colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary,
+        brightness: Brightness.dark,),
+
+        appBarTheme: AppBarTheme(
+          backgroundColor: AppColors.darkAppBar,
+          foregroundColor: AppColors.darkText,
+          elevation: 0,
           titleTextStyle: GoogleFonts.fredoka(
-            color: AppColors.white,
+            color: AppColors.darkText,
             fontSize: 22,
             fontWeight: FontWeight.bold,
           ),
         ),
 
+        cardTheme: CardThemeData(
+          color: AppColors.darkCard,
+        ),
+
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primary,
-            foregroundColor:AppColors.white,
+            foregroundColor: const Color(0xFF18301B),
             elevation: 0,
             padding: const EdgeInsets.symmetric(
               vertical: 14,
@@ -65,7 +114,42 @@ class RecycleGoApp extends StatelessWidget {
             ),
           ),
         ),
-      ),
+
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: AppColors.darkCard,
+
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      );
+  }
+}
+
+void main() {
+  runApp(const RecycleGoApp());
+}
+
+class RecycleGoApp extends StatefulWidget {
+  const RecycleGoApp({super.key});
+
+  @override
+  State<RecycleGoApp> createState()=> _RecycleGoAppState();
+  // This widget is the root of your application.
+}
+
+class _RecycleGoAppState extends State<RecycleGoApp>{
+  bool isDarkMode =false;
+  
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'RecycleGo',
+
+      theme: AppTheme.lightTheme(),
+      darkTheme: AppTheme.darkTheme(),
+      themeMode: isDarkMode? ThemeMode.dark: ThemeMode.light,
       home: const WeeklyGoalPage(),
     );
   }
@@ -204,7 +288,6 @@ class _profilePageState extends State<ProfilePage>{
   @override
   Widget build(BuildContext context){
     return Scaffold(
-      backgroundColor: AppColors.background,
 
       appBar: AppBar(
         title: const Text('Profile'),
@@ -232,7 +315,7 @@ class _profilePageState extends State<ProfilePage>{
               style: GoogleFonts.fredoka(
                 fontSize: 26,
                 fontWeight: FontWeight.bold,
-                color: AppColors.text,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
 
@@ -245,7 +328,7 @@ class _profilePageState extends State<ProfilePage>{
                 style: GoogleFonts.fredoka(
                   fontSize: 21,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.text,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ),
@@ -285,7 +368,7 @@ class _profilePageState extends State<ProfilePage>{
               width: double.infinity,
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                color: AppColors.white,
+                color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(20),
               ),
 
@@ -298,7 +381,7 @@ class _profilePageState extends State<ProfilePage>{
                     style: GoogleFonts.fredoka(
                       fontSize: 21,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.text,
+                      color: Theme.of(context).colorScheme.onSurface
                     ),
                   ),
 
@@ -308,7 +391,7 @@ class _profilePageState extends State<ProfilePage>{
                     '${widget.weeklyGoal} items per week',
                     style: GoogleFonts.nunito(
                       fontSize: 16,
-                      color: AppColors.text,
+                      color: Theme.of(context).colorScheme.onSurface
                     ),
                   ),
 
@@ -376,6 +459,28 @@ class _profilePageState extends State<ProfilePage>{
                 ],
               ),
             ),
+
+            const SizedBox(height: 15),
+
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(
+                'Dark Mode',
+                style: GoogleFonts.fredoka(
+                  fontSize: 18,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
+              value: Theme.of(context).brightness == Brightness.dark,
+              onChanged: (value){
+                final appState = context
+                .findAncestorStateOfType<_RecycleGoAppState>();
+
+                appState?.setState(() {
+                  appState.isDarkMode = value;
+                });
+              },
+            ),
           ],
         ),
       ),
@@ -390,7 +495,7 @@ class _profilePageState extends State<ProfilePage>{
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16),
       decoration: BoxDecoration(
-        color: AppColors.white, 
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(18),
       ),
 
@@ -408,7 +513,7 @@ class _profilePageState extends State<ProfilePage>{
             style: GoogleFonts.fredoka(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: AppColors.text,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
 
@@ -416,7 +521,7 @@ class _profilePageState extends State<ProfilePage>{
             label, 
             style: GoogleFonts.nunito(
               fontSize: 13,
-              color: AppColors.text,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
         ],
@@ -497,7 +602,7 @@ class ActivityPage extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
                     decoration: BoxDecoration(
-                      color: Colors.green.shade100,
+                      color: Theme.of(context).cardColor,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text('+${activity.points} pts',
@@ -561,15 +666,9 @@ class _HomePageState extends State<HomePage> {
     final displayedActivities = recentActivities.take(3).toList();
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        title: Text('RecycleGo',
-        style: GoogleFonts.fredoka(
-          color: AppColors.white,
-          fontWeight: FontWeight.bold,
-          fontSize: 22,
-        ),),
+        title: Text('RecycleGo'),
 
         actions: [
           IconButton(
@@ -586,9 +685,7 @@ class _HomePageState extends State<HomePage> {
               }
             },
             icon: const Icon(
-              Icons.account_circle,
-              color: AppColors.white,
-              size: 30,
+              Icons.account_circle
             ),
           ),
           const SizedBox(width: 8),
@@ -604,7 +701,7 @@ class _HomePageState extends State<HomePage> {
                style: GoogleFonts.fredoka(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
-                color: AppColors.text,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
          ),
 
@@ -617,7 +714,7 @@ class _HomePageState extends State<HomePage> {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
-                    color: Colors.green.shade50,
+                    color: Theme.of(context).cardColor,
                   ),
                   child: Column(children: [
                     Text('⭐',
@@ -629,12 +726,12 @@ class _HomePageState extends State<HomePage> {
                     style: GoogleFonts.fredoka(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.text,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),),
                     Text('Points',
                     style: GoogleFonts.nunito(
                       fontSize: 14,
-                      color: AppColors.text,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),),
                   ],),
                 ),
@@ -645,7 +742,7 @@ class _HomePageState extends State<HomePage> {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
-                    color: Colors.green.shade50,
+                    color: Theme.of(context).cardColor,
                   ),
                   child: Column(children: [
                     const Text('♻️', style: TextStyle(fontSize: 24,),),
@@ -656,11 +753,11 @@ class _HomePageState extends State<HomePage> {
                     style: GoogleFonts.fredoka(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.text,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),),
                     Text('Items', style: GoogleFonts.nunito(
                       fontSize: 14,
-                      color: AppColors.text,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),),
                   ],),
                 ),
@@ -671,7 +768,7 @@ class _HomePageState extends State<HomePage> {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
-                    color: Colors.green.shade50,
+                    color: Theme.of(context).cardColor,
                   ),
                   child: Column(children: [
                     const Text('🔥', style: TextStyle(fontSize: 24),),
@@ -681,12 +778,12 @@ class _HomePageState extends State<HomePage> {
                     Text('$streak', style: GoogleFonts.fredoka(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.text,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),),
                     Text('Streak',
                     style: GoogleFonts.nunito(
                       fontSize: 14,
-                      color: AppColors.text,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),),
                   ],),
                 ),
@@ -728,7 +825,7 @@ class _HomePageState extends State<HomePage> {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            color: Colors.green.shade50,
+            color: Theme.of(context).cardColor,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -738,7 +835,7 @@ class _HomePageState extends State<HomePage> {
                  style: GoogleFonts.fredoka(
                  fontSize: 21,
                  fontWeight: FontWeight.bold,
-                 color: AppColors.text,
+                 color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
 
@@ -750,7 +847,7 @@ class _HomePageState extends State<HomePage> {
                     value: weeklyGoal == 0 ? 0 
                       :(weeklyItems/weeklyGoal).clamp(0.0, 1.0),
                     minHeight: 10,
-                    backgroundColor: AppColors.softBlue,
+                    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                     valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),),
                 ),
 
@@ -768,7 +865,7 @@ class _HomePageState extends State<HomePage> {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            color: Colors.blue.shade50,
+            color: Theme.of(context).cardColor,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -778,7 +875,7 @@ class _HomePageState extends State<HomePage> {
                 style: GoogleFonts.fredoka(
                 fontSize: 21,
                 fontWeight: FontWeight.bold,
-                color: AppColors.text,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
 
