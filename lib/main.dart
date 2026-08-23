@@ -170,7 +170,7 @@ class RecyclingActivity {
     this.photoPath,
   });
 }
-
+//error
 class WeeklyGoalPage extends StatefulWidget{
   const WeeklyGoalPage({super.key});
 
@@ -181,11 +181,7 @@ class WeeklyGoalPage extends StatefulWidget{
 class _WeeklyGoalPageState extends State<WeeklyGoalPage>{
   final TextEditingController goalController=TextEditingController();
 
-  @override
-  void dispose(){
-    goalController.dispose();
-    super.dispose();
-  }
+  
 
   void saveGoal(){
     final goal=int.tryParse(goalController.text);
@@ -396,7 +392,7 @@ class _profilePageState extends State<ProfilePage>{
                   ),
 
                   const SizedBox(height: 15),
-
+//error
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -446,7 +442,7 @@ class _profilePageState extends State<ProfilePage>{
                           },
                         );
 
-                        controller.dispose();
+                       
 
                         if (result !=null && mounted){
                           // ignore: use_build_context_synchronously
