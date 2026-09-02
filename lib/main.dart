@@ -1,11 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:hive_ce_flutter/hive_ce_flutter.dart';
+import 'package:recycle_app/models/recycling_activity.dart';
+import 'services/hive_ce_flutter.dart';
 
 import 'services/storage_service.dart';
 import 'theme/app_theme.dart';
 
 import 'screens/startup_page.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  Hive.registerAdapter(RecyclingActivityAdapter());
+
+  await Hive.openBox<RecyclingActivity>('activities');
+
   runApp(const RecycleGoApp());
 }
 

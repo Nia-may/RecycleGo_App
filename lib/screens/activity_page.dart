@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import '/models/recycling_activity.dart';
+import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 
 class ActivityPage extends StatelessWidget {
-  final List<RecyclingActivity> activities;
-
-  const ActivityPage({super.key, required this.activities});
+  const ActivityPage({super.key});
 
   String formatDate(DateTime date){
     final now = DateTime.now();
@@ -38,14 +37,19 @@ class ActivityPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Activity History'),
       ),
-      body: activities.isEmpty
-          ? const Center(child: Text('No activities to display'))
-          : ListView.builder(
-              padding: const EdgeInsets.all(16.0),
+      body: ValueListenableBuilder(valueListenable: Hive.box<RecyclingActivity>('activities').listenable(), 
+      builder: (context, Box<RecyclingActivity> box, _){
+        final activities = box.values.toList().reversed.toList();
+        if(activities.isEmpty){
+          return const Center(child: Text('No activities to display'));
+        }
+        return ListView.builder(
+          padding: const EdgeInsets.all(16.0),
               itemCount: activities.length,
               itemBuilder: (context, index) {
                 final activity = activities[index];
                 final DateTime dateTime = activity.dateTime;
+                
 
           return Card(
             margin: const EdgeInsets.only(bottom: 12),
@@ -89,13 +93,15 @@ class ActivityPage extends StatelessWidget {
                   Text(
                     '${formatDate(dateTime)} • ${formatTime(dateTime)}',
                     style: const TextStyle(color: Colors.grey),
+                 ),
+                    ],
                   ),
-                ],   
-              ),
-            ),
-          );
+                ),
+              ); // closes Card
+            },
+          ); // closes ListView.builder
         },
-      ),
+      ), // closes ValueListenableBuilder
     );
   }
 }

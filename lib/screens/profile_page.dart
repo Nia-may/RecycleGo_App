@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:google_fonts/google_fonts.dart';
 import '/theme/app_theme.dart';
+import '/services/storage_service.dart';
 
 class ProfilePage extends StatefulWidget{
   final int weeklyGoal;
@@ -178,6 +179,7 @@ class _profilePageState extends State<ProfilePage>{
                        
 
                         if (result !=null && mounted){
+                          await StorageService.saveWeeklyGoal(result);
                           // ignore: use_build_context_synchronously
                           Navigator.pop(context, result);
                         }

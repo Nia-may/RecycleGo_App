@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
+import 'package:recycle_app/services/hive_ce_flutter.dart';
+
 class RecylingPage extends StatefulWidget {
   const RecylingPage({super.key});
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:recycle_app/services/hive_ce_flutter.dart';
 import '/services/storage_service.dart';
 import 'profile_page.dart';
 import 'recycling_page.dart';
@@ -37,6 +38,7 @@ class _HomePageState extends State<HomePage> {
     weeklyGoal=widget.weeklyGoal;
 
     loadData();
+    loadActivities();
   }
 
 Future<void> loadData() async {
@@ -46,7 +48,7 @@ Future<void> loadData() async {
   final savedWeeklyItems=await StorageService.getWeeklyItems();
   final savedLastDate=await StorageService.getRecyclingDate();
 
-  if (mounted){
+  if (!mounted) return;
     setState((){
       totalPoints=savedPoints;
       totalItems=savedItems;
@@ -54,7 +56,16 @@ Future<void> loadData() async {
       weeklyItems=savedWeeklyItems;
       lastRecyclingDate=savedLastDate;
     });
-  }
+}
+
+void loadActivities(){
+  final savedActivities=ActivityService.getAllActivities();
+
+  if(!mounted) return;
+
+  setState(() {
+    recentActivities=savedActivities.reversed.toList();
+  });
 }
   int weeklyItems=0;
 
@@ -220,18 +231,21 @@ Future<void> loadData() async {
               final points = result['points'] as int;
               final items = result['items'] as int;
 
+              final activity=RecyclingActivity(
+                item: result['item'] as String, 
+                quantity: items, 
+                points: points, 
+                dateTime: DateTime.now(),
+                photoPath: result['photoPath'] as String?,);
+
+                await ActivityService.addActivity(activity);
+
               setState(() {
                 totalPoints += points;
                 totalItems += items;
                 weeklyItems += items;
 
-                recentActivities.insert(0, RecyclingActivity(
-                  item: result['item'] as String,
-                  quantity: items,
-                  points: points,
-                  dateTime: DateTime.now(),
-                  photoPath: result['photoPath'] as String?,
-                ),);
+                recentActivities.insert(0, activity);
 
                 updateStreak();
               });
@@ -343,7 +357,7 @@ Future<void> loadData() async {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => ActivityPage(activities: recentActivities,),),
+                MaterialPageRoute(builder: (context) => const ActivityPage(),),
               );
             },
             child: const Text('View Activity History'),
