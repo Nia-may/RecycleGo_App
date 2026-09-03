@@ -349,7 +349,7 @@ void loadActivities(){
             ],
           ),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 10),
 
         Align(
           alignment: Alignment.centerRight,
