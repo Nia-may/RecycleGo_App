@@ -48,6 +48,10 @@ class _profilePageState extends State<ProfilePage>{
     return weeklyData;
   }
 
+  int getWeeklyTotal(){
+    return getWeeklyData().fold(0, (sum, value)=> sum + value.toInt());
+  }
+
   List<double> getMonthlyData(){
     final box=Hive.box<RecyclingActivity>('activities');
 
@@ -65,6 +69,10 @@ class _profilePageState extends State<ProfilePage>{
       }
     }
     return monthlyData;
+  }
+
+  int getMonthlyTotal(){
+    return getMonthlyData().fold(0, (sum, value)=> sum + value.toInt());
   }
 
   void previousMonth(){
@@ -125,12 +133,14 @@ class _profilePageState extends State<ProfilePage>{
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              '📈 Weekly Recycling',
+            Center(
+              child: Text(
+              'Weekly Recycling',
               style: GoogleFonts.fredoka(
                 fontSize: 21,
                 fontWeight: FontWeight.bold,
                 color: Theme.of(context).colorScheme.onSurface
+              ),
               ),
             ),
 
@@ -151,6 +161,13 @@ class _profilePageState extends State<ProfilePage>{
                     show: true,
                     drawVerticalLine: false,
                     horizontalInterval: 1,
+                    getDrawingHorizontalLine: (value) {
+                      return FlLine(
+                        // ignore: deprecated_member_use
+                        color: Theme.of(context).dividerColor.withOpacity(0.3),
+                        strokeWidth: 1,
+                      );
+                    },
                   ),
 
                   titlesData: FlTitlesData(
@@ -199,8 +216,8 @@ class _profilePageState extends State<ProfilePage>{
                       barRods: [
                         BarChartRodData(
                           toY: weeklyData[index],
-                          width: 18,
-                          borderRadius: BorderRadius.circular(8),
+                          width: 20,
+                          borderRadius: BorderRadius.circular(10),
                           color: AppColors.softGreen,
                         ),
                       ],
@@ -209,6 +226,27 @@ class _profilePageState extends State<ProfilePage>{
                  ),
                 ),
               ),
+
+              const SizedBox(height: 12),
+
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10,),
+                decoration: BoxDecoration(
+                  // ignore: deprecated_member_use
+                  color: AppColors.softGreen.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Text(
+                  'Total this week: ${getWeeklyTotal()} items',
+                  style: GoogleFonts.nunito(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              )
           ],
         ),
       );
@@ -226,39 +264,51 @@ class _profilePageState extends State<ProfilePage>{
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '📈 Monthly Recycling',
-            style: GoogleFonts.fredoka(
-              fontSize: 21,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.onSurface
+          Center(
+            child: Text(
+              'Monthly Recycling',
+              style: GoogleFonts.fredoka(
+                fontSize: 21,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
+            ),
             ),
           ),
 
           const SizedBox(height: 20),
 
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              IconButton(
-                onPressed: previousMonth,
-                icon: const Icon(Icons.chevron_left),
-              ),
-
-              Text(
-                '${getSelectedMonthName()} $selectedYear',
-                style: GoogleFonts.fredoka(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onSurface
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4,),
+            decoration: BoxDecoration(
+              // ignore: deprecated_member_use
+              color: AppColors.softGreen.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                IconButton(
+                  onPressed: previousMonth,
+                  icon: const Icon(Icons.chevron_left),
+                  splashRadius: 20,
                 ),
-              ),
 
-              IconButton(
-                onPressed: nextMonth,
-                icon: const Icon(Icons.chevron_right),
-              ),
-            ],
+                Text(
+                  '${getSelectedMonthName()} $selectedYear',
+                  style: GoogleFonts.fredoka(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+
+                IconButton(
+                  onPressed: nextMonth,
+                  icon: const Icon(Icons.chevron_right),
+                  splashRadius: 20,
+                ),
+              ],
+            ),
           ),
 
           const SizedBox(height: 12),
@@ -277,6 +327,13 @@ class _profilePageState extends State<ProfilePage>{
                   show: true,
                   drawVerticalLine: false,
                   horizontalInterval: 1,
+                  getDrawingHorizontalLine: (value) {
+                      return FlLine(
+                        // ignore: deprecated_member_use
+                        color: Theme.of(context).dividerColor.withOpacity(0.3),
+                        strokeWidth: 1,
+                      );
+                    },
                 ),
 
                 titlesData: FlTitlesData(
@@ -333,7 +390,7 @@ class _profilePageState extends State<ProfilePage>{
                     barRods: [
                       BarChartRodData(
                         toY: monthlyData[index],
-                        width: 10,
+                        width: 11,
                         borderRadius: BorderRadius.circular(6),
                         color: AppColors.softGreen,
                       ),
@@ -343,6 +400,27 @@ class _profilePageState extends State<ProfilePage>{
               ),
             ),
           ),
+
+           const SizedBox(height: 12),
+
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10,),
+                decoration: BoxDecoration(
+                  // ignore: deprecated_member_use
+                  color: AppColors.softGreen.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Text(
+                  'Total this month (${getSelectedMonthName()}): ${getMonthlyTotal()} items',
+                  style: GoogleFonts.nunito(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              )
         ],
       ),
       );
@@ -382,17 +460,15 @@ class _profilePageState extends State<ProfilePage>{
 
             const SizedBox(height: 25),
 
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                '📊 Your Recycling',
+              Text(
+                'Your Recycling',
+                textAlign: TextAlign.center,
                 style: GoogleFonts.fredoka(
                   fontSize: 21,
                   fontWeight: FontWeight.bold,
                   color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
-            ),
 
             const SizedBox(height: 12),
 
