@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 import 'package:recycle_app/models/recycling_activity.dart';
 import 'services/hive_ce_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'services/storage_service.dart';
 import 'theme/app_theme.dart';
@@ -10,10 +11,18 @@ import 'screens/startup_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await Hive.initFlutter();
   Hive.registerAdapter(RecyclingActivityAdapter());
 
   await Hive.openBox<RecyclingActivity>('activities');
+
+  //initialize supabase
+  await Supabase.initialize(
+    url: 'https://knwsuxnynmxgpbyupfel.supabase.co',
+    // ignore: deprecated_member_use
+    publishableKey: 'sb_publishable_aI209OMP6h-uXcX7IylLaQ_BDD6AMYC',
+  );
 
   runApp(const RecycleGoApp());
 }

@@ -6,6 +6,8 @@ import '/services/storage_service.dart';
 import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 import '/models/recycling_activity.dart';
 import 'package:fl_chart/fl_chart.dart';
+import '/pages/login_page.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfilePage extends StatefulWidget{
   final int weeklyGoal;
@@ -115,6 +117,10 @@ class _profilePageState extends State<ProfilePage>{
       return 5;
     }
     return (maxValue + 2).ceilToDouble();
+  }
+
+  User? get currentUser{
+    return Supabase.instance.client.auth.currentUser;
   }
 
   @override
@@ -438,26 +444,47 @@ class _profilePageState extends State<ProfilePage>{
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            CircleAvatar(
-              radius: 50,
-              backgroundColor: AppColors.softGreen,
-              child: const Text(
-                '👤',
-                style: TextStyle(fontSize: 45),
+            GestureDetector(
+              onTap: ()  async{
+                // Navigate to the login page
+                if (currentUser == null){
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const LoginPage()),
+                  );
+
+                  if (mounted){
+                    setState(() {});
+                  }
+                }
+              },
+              child: Column(
+                children: [
+                  CircleAvatar(
+                    radius: 50,
+                    backgroundColor: AppColors.softGreen,
+                    backgroundImage: currentUser?.userMetadata?['avatar_url'] != null
+                    ? NetworkImage(currentUser!.userMetadata!['avatar_url'],)
+                    :null,
+                    child: currentUser?.userMetadata?['avatar_url'] == null ? const Text(
+                      '🌳',
+                      style: TextStyle(fontSize: 45),
+                    ) : null,
+                ),
+
+                const SizedBox(height: 15),
+                Text(
+                  currentUser?.userMetadata?['full_name']?? 'Sign In | Sign Up',
+                  style: GoogleFonts.fredoka(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+                ],
               ),
             ),
-
-            const SizedBox(height: 15),
-
-            Text(
-              'Nin',
-              style: GoogleFonts.fredoka(
-                fontSize: 26,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-            ),
-
+            
             const SizedBox(height: 25),
 
               Text(
@@ -603,6 +630,23 @@ class _profilePageState extends State<ProfilePage>{
             ),
 
             const SizedBox(height: 15),
+
+            if (currentUser != null) ...[
+              const SizedBox(height: 20),
+
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(onPressed: () async {
+                  await Supabase.instance.client.auth.signOut();
+
+                  if (mounted){
+                    setState(() {});
+                  }
+                },
+                icon: const Icon(Icons.logout),
+                label: const Text('Log Out'),),
+              ),
+            ],
           ],
         ),
       ),
