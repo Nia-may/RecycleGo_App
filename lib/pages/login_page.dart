@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '/theme/app_theme.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '/services/supabase_activity.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -15,15 +16,19 @@ class _LoginPageState extends State<LoginPage> {
   void initState(){
     super.initState();
 
-    Supabase.instance.client.auth.onAuthStateChange.listen((data){
+    Supabase.instance.client.auth.onAuthStateChange.listen((data) async {
       final session = data.session;
       final event = data.event;
 
       debugPrint('Auth event: $event');
       debugPrint('Session: ${session != null}');
 
-      if (session != null && mounted){
+      if (session != null){
+        await SupabaseActivity.restoreActivitiesToHive();
+
+      if (mounted){
         Navigator.pop(context);
+      }
       }
     });
   }

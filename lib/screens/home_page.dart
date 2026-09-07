@@ -7,6 +7,8 @@ import 'recycling_page.dart';
 import 'activity_page.dart';
 import '/theme/app_theme.dart';
 import '/models/recycling_activity.dart';
+import 'package:recycle_app/services/supabase_activity.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class HomePage extends StatefulWidget {
   final int weeklyGoal;
@@ -67,6 +69,7 @@ void loadActivities(){
     recentActivities=savedActivities.reversed.toList();
   });
 }
+
   int weeklyItems=0;
 
   List<RecyclingActivity> recentActivities = [];
@@ -239,6 +242,10 @@ void loadActivities(){
                 photoPath: result['photoPath'] as String?,);
 
                 await ActivityService.addActivity(activity);
+
+                if (Supabase.instance.client.auth.currentUser != null){
+                  await SupabaseActivity.uploadActivity(activity);
+                }
 
               setState(() {
                 totalPoints += points;
