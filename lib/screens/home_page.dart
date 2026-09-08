@@ -41,7 +41,44 @@ class _HomePageState extends State<HomePage> {
 
     loadData();
     loadActivities();
+    recalculateStats();
   }
+
+Future<void> recalculateStats() async {
+  final activities = ActivityService.getAllActivities();
+
+  int points = 0;
+  int items = 0;
+  int weekly = 0;
+
+  for (final activity in activities){
+    points += activity.points;
+    items += activity.quantity;
+
+    final now = DateTime.now();
+    final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+
+    if (activity.dateTime.isAfter(
+      DateTime(
+        startOfWeek.year,
+        startOfWeek.month,
+        startOfWeek.day,
+      ),
+    )) {
+      weekly +=activity.quantity;
+    }
+  }
+
+  if (!mounted) return;
+
+  final calculatedStreak=calculateStreak(activities);
+
+  setState(() {
+    totalPoints = points;
+    totalItems = items;
+    weeklyItems =  weekly;
+  });
+}
 
 Future<void> loadData() async {
   final savedPoints=await StorageService.getPoints();
@@ -90,6 +127,44 @@ void loadActivities(){
     lastRecyclingDate = today;
   }
 
+int calculateStreak(List<RecyclingActivity> activities){
+  if (activities.isEmpty){
+    return 0;
+  }
+
+  final dates = activities
+    .map((activity) => DateTime(
+      activity.dateTime.year,
+      activity.dateTime.month,
+      activity.dateTime.day,
+    ))
+    .toSet()
+    .toList();
+
+  dates.sort((a,b) => b.compareTo(a));
+
+  final today = DateTime.now();
+  final todayDate = DateTime(today.year, today.month, today.day);
+
+  if (dates.first != todayDate){
+    return 0;
+  }
+
+  int currentStreak =1;
+
+  for (int i = 1; i<dates.length;i++){
+    final difference = dates[i-1].difference(dates[i]).inDays;
+
+    if(difference == 1){
+      currentStreak++;
+    }else{
+      break;
+    }
+  }
+
+  return currentStreak;
+}
+
   @override
   Widget build(BuildContext context) {
     final displayedActivities = recentActivities.take(3).toList();
@@ -108,6 +183,11 @@ void loadActivities(){
                 onDarkModeChanged: widget.onDarkModeChanged,
                ),),
               );
+
+              if (mounted){
+                await recalculateStats();
+                loadActivities();
+              }
 
               if (result != null && result is int && mounted){
                 setState(() {

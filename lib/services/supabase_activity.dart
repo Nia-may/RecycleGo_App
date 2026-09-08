@@ -1,6 +1,8 @@
 import 'package:recycle_app/services/hive_ce_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '/models/recycling_activity.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 
 class SupabaseActivity{
   static final _supabase = Supabase.instance.client;
@@ -14,13 +16,32 @@ class SupabaseActivity{
       throw Exception('User is not logged in');
     }
 
+    String? remotePhotoPath;
+    if(activity.photoPath != null){
+      final file=File(activity.photoPath!);
+
+      if (await file.exists()){
+        final extension = activity.photoPath!.split('.').last;
+        final storagePath = '${user.id}/${activity.id}.$extension';
+
+        await _supabase.storage
+          .from('recycling-photos')
+          .upload(storagePath, file, fileOptions: const FileOptions(
+            upsert: true,
+          ),);
+
+        remotePhotoPath=storagePath;
+      }
+    }
+
     await _supabase.from('activities').insert({
+      'id':activity.id,
       'user_id':user.id,
       'item':activity.item,
       'quantity': activity.quantity,
       'points': activity.points,
       'date_time': activity.dateTime.toIso8601String(),
-      'photo_path': activity.photoPath,
+      'photo_path': remotePhotoPath,
     });
   }
 
@@ -39,6 +60,7 @@ class SupabaseActivity{
 
     return (response as List).map((data){
       return RecyclingActivity(
+        id: data['id'],
         item: data['item'], 
         quantity: data['quantity'], 
         points: data['points'], 
@@ -53,38 +75,48 @@ class SupabaseActivity{
 
     final localActivities = ActivityService.getAllActivities();
 
+    final directory = await getApplicationDocumentsDirectory();
+
     for (final cloudActivity in cloudActivities){
       final alreadyExists=localActivities.any(
-        (localActivity) =>
-          localActivity.item == cloudActivity.item &&
-          localActivity.quantity == cloudActivity.quantity &&
-          localActivity.points == cloudActivity.points &&
-          localActivity.dateTime
-                    .difference(cloudActivity.dateTime)
-                    .abs()
-                    .inSeconds<
-                    2,
+        (localActivity) => localActivity.id == cloudActivity.id,
       );
 
       if (!alreadyExists){
-        await ActivityService.addActivity(cloudActivity);
-      }
-    }
-  }
+        String? localPhotoPath = cloudActivity.photoPath;
 
-  static Future<void> removeDuplicateActivities() async{
-    final activities=ActivityService.getAllActivities();
+        if(cloudActivity.photoPath != null){
+          final storagePath = cloudActivity.photoPath!;
+          final fileName= storagePath.split('/').last;
 
-    final seen=<String>{};
+          final localFile=File(
+            '${directory.path}/$fileName',
+          );
 
-    for (final activity in activities){
-      final key=
-        '${activity.item}_${activity.quantity}_${activity.points}_${activity.dateTime.toIso8601String().substring(0,19)}';
+          try {
+            final photoBytes = await _supabase.storage
+              .from('recycling-photos')
+              .download(storagePath);
 
-      if(seen.contains(key)){
-        await ActivityService.deleteActivity(activity);
-      }else{
-        seen.add(key);
+            await localFile.writeAsBytes(photoBytes);
+
+            localPhotoPath = localFile.path;
+          }catch (e){
+            print('Failed to download photo: $e');
+            localPhotoPath = null;
+          }
+        }
+
+        final restoredActivity = RecyclingActivity(
+          id: cloudActivity.id,
+          item: cloudActivity.item,
+          quantity: cloudActivity.quantity,
+          points: cloudActivity.points,
+          dateTime: cloudActivity.dateTime,
+          photoPath: localPhotoPath,
+        );
+
+        await ActivityService.addActivity(restoredActivity);
       }
     }
   }

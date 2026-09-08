@@ -22,13 +22,14 @@ class RecyclingActivityAdapter extends TypeAdapter<RecyclingActivity> {
       points: (fields[2] as num).toInt(),
       dateTime: fields[3] as DateTime,
       photoPath: fields[4] as String?,
+      id: fields[5] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, RecyclingActivity obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.item)
       ..writeByte(1)
@@ -38,7 +39,9 @@ class RecyclingActivityAdapter extends TypeAdapter<RecyclingActivity> {
       ..writeByte(3)
       ..write(obj.dateTime)
       ..writeByte(4)
-      ..write(obj.photoPath);
+      ..write(obj.photoPath)
+      ..writeByte(5)
+      ..write(obj.id);
   }
 
   @override
