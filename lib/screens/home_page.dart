@@ -34,15 +34,19 @@ class _HomePageState extends State<HomePage> {
   DateTime? lastRecyclingDate;
 
   late int weeklyGoal;
-  @override
-  void initState(){
-    super.initState();
-    weeklyGoal=widget.weeklyGoal;
+@override
+void initState() {
+  super.initState();
+  weeklyGoal = widget.weeklyGoal;
 
-    loadData();
-    loadActivities();
-    recalculateStats();
-  }
+  loadHomeData();
+}
+
+Future<void> loadHomeData() async {
+  await loadData();
+  loadActivities();
+  await recalculateStats();
+}
 
 Future<void> recalculateStats() async {
   final activities = ActivityService.getAllActivities();
@@ -77,6 +81,7 @@ Future<void> recalculateStats() async {
     totalPoints = points;
     totalItems = items;
     weeklyItems =  weekly;
+    streak=calculatedStreak;
   });
 }
 
@@ -100,10 +105,14 @@ Future<void> loadData() async {
 void loadActivities(){
   final savedActivities=ActivityService.getAllActivities();
 
+  savedActivities.sort(
+    (a,b) => b.dateTime.compareTo(a.dateTime),
+  );
+
   if(!mounted) return;
 
   setState(() {
-    recentActivities=savedActivities.reversed.toList();
+    recentActivities=savedActivities;
   });
 }
 

@@ -8,43 +8,74 @@ class SupabaseActivity{
   static final _supabase = Supabase.instance.client;
 
   static Future<void> uploadActivity(
-    RecyclingActivity activity,
-  )async{
-    final user = _supabase.auth.currentUser;
+  RecyclingActivity activity,
+) async {
+  final user = _supabase.auth.currentUser;
 
-    if (user == null){
-      throw Exception('User is not logged in');
-    }
+  if (user == null) {
+    throw Exception('User is not logged in');
+  }
 
-    String? remotePhotoPath;
-    if(activity.photoPath != null){
-      final file=File(activity.photoPath!);
+  String? remotePhotoPath;
 
-      if (await file.exists()){
-        final extension = activity.photoPath!.split('.').last;
-        final storagePath = '${user.id}/${activity.id}.$extension';
+  // Handle photo
+  if (activity.photoPath != null) {
+    final file = File(activity.photoPath!);
+
+    print('PHOTO PATH: ${activity.photoPath}');
+    print('PHOTO EXISTS: ${await file.exists()}');
+
+    if (await file.exists()) {
+      final extension = activity.photoPath!.split('.').last;
+      final storagePath = '${user.id}/${activity.id}.$extension';
+
+      try {
+        print('STARTING PHOTO UPLOAD: $storagePath');
 
         await _supabase.storage
-          .from('recycling-photos')
-          .upload(storagePath, file, fileOptions: const FileOptions(
-            upsert: true,
-          ),);
+            .from('recycling-photos')
+            .upload(
+              storagePath,
+              file,
+              fileOptions: const FileOptions(
+                upsert: false,
+              ),
+            );
 
-        remotePhotoPath=storagePath;
+        remotePhotoPath = storagePath;
+
+        print('PHOTO UPLOAD SUCCESS');
+      } catch (e) {
+        print('PHOTO UPLOAD FAILED: $e');
+
+        // Don't stop the database upload if the photo fails
+        remotePhotoPath = null;
       }
+    } else {
+      print('PHOTO FILE DOES NOT EXIST');
     }
+  }
+
+  // Save activity to database
+  try {
+    print('STARTING DATABASE INSERT');
 
     await _supabase.from('activities').insert({
-      'id':activity.id,
-      'user_id':user.id,
-      'item':activity.item,
+      'id': activity.id,
+      'user_id': user.id,
+      'item': activity.item,
       'quantity': activity.quantity,
       'points': activity.points,
       'date_time': activity.dateTime.toIso8601String(),
       'photo_path': remotePhotoPath,
     });
-  }
 
+    print('DATABASE INSERT SUCCESS');
+  } catch (e) {
+    print('DATABASE INSERT FAILED: $e');
+    rethrow;
+  }
+}
   static Future<List<RecyclingActivity>> getCloudActivities() async {
     final user =_supabase.auth.currentUser;
 

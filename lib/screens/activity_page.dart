@@ -39,7 +39,11 @@ class ActivityPage extends StatelessWidget {
       ),
       body: ValueListenableBuilder(valueListenable: Hive.box<RecyclingActivity>('activities').listenable(), 
       builder: (context, Box<RecyclingActivity> box, _){
-        final activities = box.values.toList().reversed.toList();
+        final activities = box.values.toList();
+        activities.sort(
+          (a,b) => b.dateTime.compareTo(a.dateTime),
+        );
+
         if(activities.isEmpty){
           return const Center(child: Text('No activities to display'));
         }
@@ -49,7 +53,9 @@ class ActivityPage extends StatelessWidget {
               itemBuilder: (context, index) {
                 final activity = activities[index];
                 final DateTime dateTime = activity.dateTime;
-                
+        activities.sort(
+          (a,b) => b.dateTime.compareTo(a.dateTime),
+        );        
 
           return Card(
             margin: const EdgeInsets.only(bottom: 12),
