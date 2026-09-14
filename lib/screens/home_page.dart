@@ -31,6 +31,7 @@ class _HomePageState extends State<HomePage> {
   int totalPoints = 0;
   int totalItems = 0;
   int streak=0;
+  int _selectedIndex=0;
   DateTime? lastRecyclingDate;
 
   late int weeklyGoal;
@@ -182,34 +183,6 @@ int calculateStreak(List<RecyclingActivity> activities){
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text('RecycleGo'),
-
-        actions: [
-          IconButton(
-            onPressed: () async{
-              final result = await Navigator.push (
-                context,
-                MaterialPageRoute(builder: (context)=>ProfilePage(weeklyGoal: weeklyGoal, 
-                onDarkModeChanged: widget.onDarkModeChanged,
-               ),),
-              );
-
-              if (mounted){
-                await recalculateStats();
-                loadActivities();
-              }
-
-              if (result != null && result is int && mounted){
-                setState(() {
-                  weeklyGoal=result;
-                });
-              }
-            },
-            icon: const Icon(
-              Icons.account_circle
-            ),
-          ),
-          const SizedBox(width: 8),
-        ]
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -311,54 +284,6 @@ int calculateStreak(List<RecyclingActivity> activities){
             ],
           ),
         const SizedBox(height:30),
-        ElevatedButton(
-          onPressed: () async{
-            final result = await Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const RecylingPage()),
-            );
-
-            if (result != null && result is Map) {
-
-              final points = result['points'] as int;
-              final items = result['items'] as int;
-
-              final activity=RecyclingActivity(
-                item: result['item'] as String, 
-                quantity: items, 
-                points: points, 
-                dateTime: DateTime.now(),
-                photoPath: result['photoPath'] as String?,);
-
-                await ActivityService.addActivity(activity);
-
-                if (Supabase.instance.client.auth.currentUser != null){
-                  await SupabaseActivity.uploadActivity(activity);
-                }
-
-              setState(() {
-                totalPoints += points;
-                totalItems += items;
-                weeklyItems += items;
-
-                recentActivities.insert(0, activity);
-
-                updateStreak();
-              });
-
-              await StorageService.savePoints(totalPoints);
-              await StorageService.saveItems(totalItems);
-              await StorageService.saveWeeklyItems(weeklyItems);
-              await StorageService.saveStreak(streak);
-
-              if (lastRecyclingDate != null) {
-                await StorageService.saveRecyclingDate(lastRecyclingDate!);
-              }
-            }
-          },
-          child: const Text('Recycle something'),
-        ),
-
         const SizedBox(height: 30),
 
         Container(
@@ -446,22 +371,147 @@ int calculateStreak(List<RecyclingActivity> activities){
           ),
         ),
         const SizedBox(height: 10),
-
-        Align(
-          alignment: Alignment.centerRight,
-          child: TextButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ActivityPage(),),
-              );
-            },
-            child: const Text('View Activity History'),
-          ),
-        )
         ],
         ),
       ),
+
+bottomNavigationBar: BottomNavigationBar(
+  currentIndex: _selectedIndex,
+
+  onTap: (index) async {
+    setState(() {
+      _selectedIndex = index;
+    });
+
+    // ♻️ Recycle
+    if (index == 1) {
+      final result = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const RecylingPage(),
+        ),
+      );
+
+      if (result != null && result is Map) {
+        final points = result['points'] as int;
+        final items = result['items'] as int;
+
+        final activity = RecyclingActivity(
+          item: result['item'] as String,
+          quantity: items,
+          points: points,
+          dateTime: DateTime.now(),
+          photoPath: result['photoPath'] as String?,
+        );
+
+        await ActivityService.addActivity(activity);
+
+        if (Supabase.instance.client.auth.currentUser != null) {
+          await SupabaseActivity.uploadActivity(activity);
+        }
+
+        if (!mounted) return;
+
+        setState(() {
+          totalPoints += points;
+          totalItems += items;
+          weeklyItems += items;
+
+          recentActivities.insert(0, activity);
+
+          updateStreak();
+        });
+
+        await StorageService.savePoints(totalPoints);
+        await StorageService.saveItems(totalItems);
+        await StorageService.saveWeeklyItems(weeklyItems);
+        await StorageService.saveStreak(streak);
+
+        if (lastRecyclingDate != null) {
+          await StorageService.saveRecyclingDate(lastRecyclingDate!);
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          _selectedIndex = 0;
+        });
+      }
+    }
+
+    // 📋 Activity
+    if (index == 2) {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const ActivityPage(),
+        ),
+      );
+
+      if (mounted) {
+        setState(() {
+          _selectedIndex = 0;
+        });
+      }
+    }
+
+    // 👤 Profile
+    if (index == 3) {
+      final result = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ProfilePage(
+            weeklyGoal: weeklyGoal,
+            onDarkModeChanged: widget.onDarkModeChanged,
+          ),
+        ),
+      );
+
+      if (!mounted) return;
+
+      // Get the new goal returned from ProfilePage
+      if (result != null && result is int) {
+        setState(() {
+          weeklyGoal = result;
+        });
+      }
+
+      await recalculateStats();
+      loadActivities();
+
+      if (mounted) {
+        setState(() {
+          _selectedIndex = 0;
+        });
+      }
+    }
+  },
+
+  type: BottomNavigationBarType.fixed,
+
+  items: const [
+    BottomNavigationBarItem(
+      icon: Icon(Icons.home_outlined),
+      activeIcon: Icon(Icons.home),
+      label: 'Home',
+    ),
+    BottomNavigationBarItem(
+      icon: Icon(Icons.recycling_outlined),
+      activeIcon: Icon(Icons.recycling),
+      label: 'Recycle',
+    ),
+    BottomNavigationBarItem(
+      icon: Icon(Icons.history_outlined),
+      activeIcon: Icon(Icons.history),
+      label: 'Activity',
+    ),
+    BottomNavigationBarItem(
+      icon: Icon(Icons.person_outlined),
+      activeIcon: Icon(Icons.person),
+      label: 'Profile',
+    ),
+  ],
+),
     );
   }
 }
