@@ -34,6 +34,10 @@ class _HomePageState extends State<HomePage> {
   int _selectedIndex=0;
   DateTime? lastRecyclingDate;
 
+  User? get currentUser{
+    return Supabase.instance.client.auth.currentUser;
+  }
+
   late int weeklyGoal;
 @override
 void initState() {
@@ -189,16 +193,52 @@ int calculateStreak(List<RecyclingActivity> activities){
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Hi, Nin',
-               style: GoogleFonts.fredoka(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-         ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              CircleAvatar(
+              radius: 30,
+              backgroundColor: AppColors.softGreen,
+              backgroundImage: const AssetImage('lib/assets/earth.png'),
+            ),
+
+            const SizedBox(width: 14),
+
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Hi, ${currentUser?.userMetadata?['full_name']?? 'there'}',
+                  style: GoogleFonts.fredoka(
+                    fontSize: 14,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+
+                Text(
+                  "Let's contribute to our Earth",
+                  style: GoogleFonts.nunito(
+                    fontSize: 14,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+              ],
+            ),
+            ],
+          ),
 
           const SizedBox(height: 20),
+
+          Text(
+                'Your Progress',
+                 style: GoogleFonts.gochiHand(
+                 fontSize: 21,
+                 fontWeight: FontWeight.bold,
+                 color: Theme.of(context).colorScheme.onSurface,
+                ),
+          ),
+
+          const SizedBox(height: 30),
 
           Row(
             children: [
@@ -210,8 +250,12 @@ int calculateStreak(List<RecyclingActivity> activities){
                     color: Theme.of(context).cardColor,
                   ),
                   child: Column(children: [
-                    Text('⭐',
-                    style: TextStyle(fontSize: 24),),
+                    Image.asset(
+                      'lib/assets/starTrans.png',
+                      width: 40,
+                      height: 40,
+                      fit: BoxFit.contain,
+                    ),
 
                     const SizedBox(height: 6),
                     
@@ -238,7 +282,12 @@ int calculateStreak(List<RecyclingActivity> activities){
                     color: Theme.of(context).cardColor,
                   ),
                   child: Column(children: [
-                    const Text('♻️', style: TextStyle(fontSize: 24,),),
+                    Image.asset(
+                      'lib/assets/recycleTrans.png',
+                      width: 40,
+                      height: 40,
+                      fit: BoxFit.contain,
+                    ),
 
                     const SizedBox(height: 6),
 
@@ -264,7 +313,12 @@ int calculateStreak(List<RecyclingActivity> activities){
                     color: Theme.of(context).cardColor,
                   ),
                   child: Column(children: [
-                    const Text('🔥', style: TextStyle(fontSize: 24),),
+                    Image.asset(
+                      'lib/assets/streakTrans.png',
+                      width: 40,
+                      height: 40,
+                      fit: BoxFit.contain,
+                    ),
 
                     const SizedBox(height: 6),
                     
@@ -284,7 +338,6 @@ int calculateStreak(List<RecyclingActivity> activities){
             ],
           ),
         const SizedBox(height:30),
-        const SizedBox(height: 30),
 
         Container(
           padding: const EdgeInsets.all(16),
@@ -295,14 +348,6 @@ int calculateStreak(List<RecyclingActivity> activities){
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Your Progress',
-                 style: GoogleFonts.fredoka(
-                 fontSize: 21,
-                 fontWeight: FontWeight.bold,
-                 color: Theme.of(context).colorScheme.onSurface,
-                ),
-              ),
 
                const SizedBox(height: 10),
 
