@@ -246,8 +246,12 @@ int calculateStreak(List<RecyclingActivity> activities){
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    color: Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(16),
+                    color: AppColors.softGreen.withOpacity(0.12),
+                    border: Border.all(
+                      color: AppColors.softGreen,
+                      width: 1,
+                    ),
                   ),
                   child: Column(children: [
                     Image.asset(
@@ -260,7 +264,7 @@ int calculateStreak(List<RecyclingActivity> activities){
                     const SizedBox(height: 6),
                     
                     Text('$totalPoints',
-                    style: GoogleFonts.fredoka(
+                    style: GoogleFonts.schoolbell(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       color: Theme.of(context).colorScheme.onSurface,
@@ -278,12 +282,16 @@ int calculateStreak(List<RecyclingActivity> activities){
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    color: Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(16),
+                    color: AppColors.softGreen.withOpacity(0.12),
+                    border: Border.all(
+                      color: AppColors.softGreen,
+                      width: 1,
+                    ),
                   ),
                   child: Column(children: [
                     Image.asset(
-                      'lib/assets/recycleTrans.png',
+                      'lib/assets/DogBin.png',
                       width: 40,
                       height: 40,
                       fit: BoxFit.contain,
@@ -292,7 +300,7 @@ int calculateStreak(List<RecyclingActivity> activities){
                     const SizedBox(height: 6),
 
                     Text('$totalItems',
-                    style: GoogleFonts.fredoka(
+                    style: GoogleFonts.schoolbell(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       color: Theme.of(context).colorScheme.onSurface,
@@ -309,8 +317,12 @@ int calculateStreak(List<RecyclingActivity> activities){
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    color: Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(16),
+                    color: AppColors.softGreen.withOpacity(0.12),
+                    border: Border.all(
+                      color: AppColors.softGreen,
+                      width: 1,
+                    ),
                   ),
                   child: Column(children: [
                     Image.asset(
@@ -322,7 +334,7 @@ int calculateStreak(List<RecyclingActivity> activities){
 
                     const SizedBox(height: 6),
                     
-                    Text('$streak', style: GoogleFonts.fredoka(
+                    Text('$streak', style: GoogleFonts.schoolbell(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       color: Theme.of(context).colorScheme.onSurface,
@@ -342,8 +354,12 @@ int calculateStreak(List<RecyclingActivity> activities){
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            color: Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(16),
+                    color: AppColors.softGreen.withOpacity(0.12),
+                    border: Border.all(
+                      color: AppColors.softGreen,
+                      width: 1,
+                    ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -351,20 +367,59 @@ int calculateStreak(List<RecyclingActivity> activities){
 
                const SizedBox(height: 10),
 
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: LinearProgressIndicator(
-                    value: weeklyGoal == 0 ? 0 
-                      :(weeklyItems/weeklyGoal).clamp(0.0, 1.0),
-                    minHeight: 10,
-                    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                    valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),),
-                ),
+              LayoutBuilder(
+                builder: (context, constraints){
+                  final progress = weeklyGoal == 0
+                    ? 0.0
+                    : (weeklyItems/weeklyGoal).clamp(0.0, 1.0);
+
+                  // ignore: unnecessary_nullable_for_final_variable_declarations
+                  const double iconSize= 24;
+                  
+                  final iconPosition=
+                    progress * (constraints.maxWidth - iconSize);
+
+                  return SizedBox(
+                    height: 28,
+                    child: Stack(
+                      alignment: Alignment.centerLeft,
+                      children: [
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          top: 9,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: LinearProgressIndicator(
+                              value: progress,
+                              minHeight: 10,
+                              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                              valueColor: const AlwaysStoppedAnimation<Color>(
+                                AppColors.primary,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        Positioned(left: iconPosition,
+                        top: 2,
+                        child: Image.asset('lib/assets/catEarth.png', width: iconSize, height: iconSize,
+                        ),
+                        ),
+                      ],
+                    ),
+                  );
+                },),
 
                 const SizedBox(height: 8),
-
-                Text('You have recycled $weeklyItems out of $weeklyGoal items this week!',
-        ),
+                Center(
+                child: Text('You have recycled $weeklyItems out of $weeklyGoal items this week!', 
+                style: GoogleFonts.handlee(
+                      fontSize: 14,
+                      color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
+                ),
             ],
           ),
         ),
@@ -382,7 +437,7 @@ int calculateStreak(List<RecyclingActivity> activities){
             children: [
               Text(
                 'Recent Activity',
-                style: GoogleFonts.fredoka(
+                style: GoogleFonts.gochiHand(
                 fontSize: 21,
                 fontWeight: FontWeight.bold,
                 color: Theme.of(context).colorScheme.onSurface,
