@@ -82,6 +82,8 @@ flutter:
     - lib/assets/earth.png
     - lib/assets/recycleBin.png
     - lib/assets/DogBin.png
+    - lib/assets/recycleIcon.png
+    - lib/assets/earthRecycle.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:

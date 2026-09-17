@@ -142,7 +142,7 @@ class _profilePageState extends State<ProfilePage>{
             Center(
               child: Text(
               'Weekly Recycling',
-              style: GoogleFonts.fredoka(
+              style: GoogleFonts.handlee(
                 fontSize: 21,
                 fontWeight: FontWeight.bold,
                 color: Theme.of(context).colorScheme.onSurface
@@ -273,7 +273,7 @@ class _profilePageState extends State<ProfilePage>{
           Center(
             child: Text(
               'Monthly Recycling',
-              style: GoogleFonts.fredoka(
+              style: GoogleFonts.handlee(
                 fontSize: 21,
                 fontWeight: FontWeight.bold,
                 color: Theme.of(context).colorScheme.onSurface,
@@ -490,7 +490,7 @@ class _profilePageState extends State<ProfilePage>{
               Text(
                 'Your Recycling',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.fredoka(
+                style: GoogleFonts.gochiHand(
                   fontSize: 21,
                   fontWeight: FontWeight.bold,
                   color: Theme.of(context).colorScheme.onSurface,
@@ -528,21 +528,30 @@ class _profilePageState extends State<ProfilePage>{
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-
-                  Text(
-                    '🎯 Your Goal',
-                    style: GoogleFonts.fredoka(
-                      fontSize: 21,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.onSurface
-                    ),
+                  Row(
+                    children: [
+                      Image.asset(
+                        'lib/assets/earthRecycle.png',
+                        width: 24,
+                        height: 24,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Your Goal',
+                        style: GoogleFonts.gochiHand(
+                          fontSize: 21,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                    ],
                   ),
 
                   const SizedBox(height: 10),
 
                   Text(
                     '${widget.weeklyGoal} items per week',
-                    style: GoogleFonts.nunito(
+                    style: GoogleFonts.handlee(
                       fontSize: 16,
                       color: Theme.of(context).colorScheme.onSurface
                     ),

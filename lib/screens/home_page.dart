@@ -429,8 +429,12 @@ int calculateStreak(List<RecyclingActivity> activities){
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            color: Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(16),
+                    color: AppColors.softGreen.withOpacity(0.12),
+                    border: Border.all(
+                      color: AppColors.softGreen,
+                      width: 1,
+                    ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -446,27 +450,56 @@ int calculateStreak(List<RecyclingActivity> activities){
 
                const SizedBox(height: 12),
 
-              if (recentActivities.isEmpty)
+             if (recentActivities.isEmpty)
                 const Text('No recent activity.')
-              else
-                Column(
+            else
+              Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: displayedActivities.map((activity) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          
-                          Text(
-                            '♻️ ${activity.item} × ${activity.quantity}',
+                  children: [
+                  // Picture on the left
+                  Image.asset(
+                    'lib/assets/recycleBin.png',
+                    width: 80,
+                    height: 80,
+                    fit: BoxFit.contain,
+                  ),
+
+                  const SizedBox(width: 14),
+
+                  // Existing activity information on the right
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: displayedActivities.map((activity) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                  children: [
+                                    Image.asset(
+                                      'lib/assets/recycleIcon.png',
+                                      width: 20,
+                                      height: 20,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      '${activity.item} × ${activity.quantity}',
+                                    ),
+                                  ],
+                                ),
+                              Text(
+                                '+${activity.points} points',
+                              ),
+                            ],
                           ),
-                          Text('+${activity.points} points'),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                )
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ],
+              )
             ],
           ),
         ),
@@ -589,15 +622,18 @@ bottomNavigationBar: BottomNavigationBar(
 
   type: BottomNavigationBarType.fixed,
 
-  items: const [
+  items: [
     BottomNavigationBarItem(
       icon: Icon(Icons.home_outlined),
       activeIcon: Icon(Icons.home),
       label: 'Home',
     ),
     BottomNavigationBarItem(
-      icon: Icon(Icons.recycling_outlined),
-      activeIcon: Icon(Icons.recycling),
+      icon: Image.asset(
+        'lib/assets/recycleIcon.png',
+        width: 28,
+        height: 28,
+      ),
       label: 'Recycle',
     ),
     BottomNavigationBarItem(
